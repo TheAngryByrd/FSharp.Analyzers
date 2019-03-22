@@ -5,12 +5,17 @@ clitool dotnet-mono 0.5.2
 clitool dotnet-sourcelink 2.8.1
 clitool dotnet-fantomas 2.8.0
 clitool dotnet-reportgenerator-cli 4.0.0-rc4
-nuget FSharp.Core 4.3.4
+nuget FSharp.Core
 nuget Expecto 8.7
 nuget SourceLink.Create.CommandLine 2.8.1 copy_local: true
 nuget YoloDev.Expecto.TestSdk 0.7.0
 nuget Microsoft.NET.Test.Sdk 15.7.2
 nuget altcover 4.0.603
+nuget FSharp.Compiler.Service ~> 27
+nuget Dotnet.ProjInfo ~> 0.31.0
+nuget FsToolkit.ErrorHandling
+nuget FSharp.Analyzers.SDK
+github Microsoft/visualfsharp:Visual-Studio-2017-Version-15.4 src/fsharp/FSharp.Build/Fsc.fs
 
 // [ FAKE GROUP ]
 group Build
@@ -30,3 +35,11 @@ group Build
     nuget Fake.Api.GitHub
     nuget Fake.BuildServer.AppVeyor
     nuget Fake.BuildServer.Travis
+
+
+// [ Analyzers Group ]
+group Analyzers
+    source https://api.nuget.org/v3/index.json
+
+    nuget FSharp.Analyzers.Sample 1.0.1
+

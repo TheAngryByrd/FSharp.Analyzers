@@ -1,2 +1,7 @@
 FSharp.Core
 SourceLink.Create.CommandLine
+FSharp.Compiler.Service
+Dotnet.ProjInfo
+FsToolkit.ErrorHandling
+FSharp.Analyzers.SDK
+File: Fsc.fs
