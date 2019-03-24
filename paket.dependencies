@@ -15,6 +15,7 @@ nuget FSharp.Compiler.Service ~> 27
 nuget Dotnet.ProjInfo ~> 0.31.0
 nuget FsToolkit.ErrorHandling
 nuget FSharp.Analyzers.SDK
+nuget Argu
 github Microsoft/visualfsharp:Visual-Studio-2017-Version-15.4 src/fsharp/FSharp.Build/Fsc.fs
 
 // [ FAKE GROUP ]
