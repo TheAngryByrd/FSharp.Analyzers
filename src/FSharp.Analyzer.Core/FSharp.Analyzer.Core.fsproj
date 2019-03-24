@@ -5,8 +5,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <Title>FSharp.Analyzer</Title>
-    <Description>FSharp.Analyzer does the thing!</Description>
+    <Title>FSharp.Analyzer.Core</Title>
+    <Description>FSharp.Analyzer.Core does the thing!</Description>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <Optimize>true</Optimize>

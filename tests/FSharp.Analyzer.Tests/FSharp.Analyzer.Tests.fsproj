@@ -11,7 +11,7 @@
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="../../src/FSharp.Analyzer/FSharp.Analyzer.fsproj" />
+        <ProjectReference Include="../../src/FSharp.Analyzer.Core/FSharp.Analyzer.Core.fsproj" />
     </ItemGroup>
     <Import Project="..\..\fsc.props" />
     <Import Project="..\..\netfx.props" />
