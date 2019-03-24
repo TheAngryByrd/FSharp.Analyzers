@@ -1,5 +1,6 @@
 namespace FSharp.Analyzer.App
 open FSharp.Analyzer.Checker
+open FsToolkit.ErrorHandling.CE.AsyncResult
 
 module AnalyzeCommand =
     open System
@@ -15,21 +16,25 @@ module AnalyzeCommand =
     type AnalyzeArgs =
         | Project of string
         | Analyzers of string
+        | Fail_On_Warnings of string list
     with
         interface IArgParserTemplate with
             member s.Usage =
                 match s with
                 | Project _ -> "The folder path to the project to analyze"
                 | Analyzers _ -> "The folder path where this app should look for analyzers.  Defaults to packages/Analyzers"
+                | Fail_On_Warnings _ -> "A list of analyzer codes to fail on. Passing an empty list will fail on any warning"
 
     type ConfigDTO = {
         Project : string option
         Analyzers : string option
+        FailOnWarnings : string list option
     }
     with
         static member Empty = {
             Project = None
             Analyzers = None
+            FailOnWarnings = None
         }
 
         static member FromArgs (args : AnalyzeArgs list) =
@@ -40,6 +45,9 @@ module AnalyzeCommand =
                     {state with Project = Some p}
                 | Analyzers a->
                     {state with Analyzers = Some a}
+                | Fail_On_Warnings w ->
+                    {state with FailOnWarnings = Some w}
+
             )
 
     type ProjectPath =
@@ -68,15 +76,15 @@ module AnalyzeCommand =
         "./packages/Analyzers"
         |> Path.GetFullPath
 
-
     type Config = {
         Project : ProjectPath
         Analyzers : Analyzer list
+        FailOnWarnings : string list option
     }
     with
         static member FromDTO (dto : ConfigDTO) =
-            let ctor project analyzers =
-                { Project = project; Analyzers = analyzers }
+            let ctor project analyzers failOn=
+                { Project = project; Analyzers = analyzers; FailOnWarnings = failOn}
             let projectPathR =
                 dto.Project
                 |> Result.requireSome "Project path not specified"
@@ -88,8 +96,10 @@ module AnalyzeCommand =
                 analyzerPath
                 |> FsAutoComplete.Analyzers.loadAnalyzers
                 |> Result.requireNotEmpty' (sprintf "No analyzers found in path %s " analyzerPath)
-
-            ctor <!> projectPathR <*> analyzersR
+            let failOnR =
+                dto.FailOnWarnings
+                |> Result.Ok
+            ctor <!> projectPathR <*> analyzersR <*> failOnR
 
     let writeInColor color s =
         let oldColor = Console.ForegroundColor
@@ -119,7 +129,34 @@ module AnalyzeCommand =
         )
         ()
 
+    let determineFailure (codeList : string list option) analyzerResults = asyncResult {
+        let messages =
+            analyzerResults
+            |> List.collect(fun ar ->
+                ar.Messages
+            )
+        let getSeverity severity =
+            messages
+            |> List.filter(fun m -> m.Severity = severity)
 
+        do! getSeverity FSharp.Analyzers.SDK.Severity.Error
+            |> Result.requireEmpty ""
+            |> Async.singleton
+        match codeList with
+        | Some x when x |> List.isEmpty ->
+            do! getSeverity FSharp.Analyzers.SDK.Severity.Warning
+                |> Result.requireEmpty ""
+                |> Async.singleton
+        | Some codes  ->
+            do! getSeverity FSharp.Analyzers.SDK.Severity.Warning
+                |> List.filter(fun ar -> codes |> Seq.exists ((=) ar.Code))
+                |> Result.requireEmpty ""
+                |> Async.singleton
+        | None ->
+            do! AsyncResult.retn ()
+
+        return ()
+    }
 
     let execute (config : Config) = asyncResult {
         let projectPath = config.Project |> ProjectPath.value
@@ -129,7 +166,7 @@ module AnalyzeCommand =
 
         let analyzerResults = parsedProject |> Checker.runAnalyzers config.Analyzers
         consoleReporter analyzerResults
-        return ()
+        do! determineFailure config.FailOnWarnings analyzerResults
     }
 
     let executeFromArgs (args : AnalyzeArgs list) =
