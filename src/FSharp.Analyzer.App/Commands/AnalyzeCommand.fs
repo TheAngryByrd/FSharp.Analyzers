@@ -129,7 +129,7 @@ module AnalyzeCommand =
         )
         ()
 
-    let determineFailure (codeList : string list option) analyzerResults = asyncResult {
+    let determineIfFailure (codeList : string list option) analyzerResults = asyncResult {
         let messages =
             analyzerResults
             |> List.collect(fun ar ->
@@ -140,17 +140,26 @@ module AnalyzeCommand =
             |> List.filter(fun m -> m.Severity = severity)
 
         do! getSeverity FSharp.Analyzers.SDK.Severity.Error
-            |> Result.requireEmpty ""
+            |> Result.requireEmpty "Failing due to analyzer finding errors"
             |> Async.singleton
+
         match codeList with
         | Some x when x |> List.isEmpty ->
             do! getSeverity FSharp.Analyzers.SDK.Severity.Warning
-                |> Result.requireEmpty ""
+                |> Result.requireEmpty "Failing due --fail-on-warnings set to fail on any warning found"
                 |> Async.singleton
         | Some codes  ->
+            let found =
+                getSeverity FSharp.Analyzers.SDK.Severity.Warning
+                |> List.filter(fun ar -> codes |> Seq.exists ((=) ar.Code))
+            let warningsFound=
+                found
+                |> List.map(fun m -> m.Code)
+                |> List.distinct
+                |> String.join ","
             do! getSeverity FSharp.Analyzers.SDK.Severity.Warning
                 |> List.filter(fun ar -> codes |> Seq.exists ((=) ar.Code))
-                |> Result.requireEmpty ""
+                |> Result.requireEmpty (sprintf "Failing due to --fail-on-warnings found %s" warningsFound)
                 |> Async.singleton
         | None ->
             do! AsyncResult.retn ()
@@ -166,7 +175,7 @@ module AnalyzeCommand =
 
         let analyzerResults = parsedProject |> Checker.runAnalyzers config.Analyzers
         consoleReporter analyzerResults
-        do! determineFailure config.FailOnWarnings analyzerResults
+        do! determineIfFailure config.FailOnWarnings analyzerResults
     }
 
     let executeFromArgs (args : AnalyzeArgs list) =
