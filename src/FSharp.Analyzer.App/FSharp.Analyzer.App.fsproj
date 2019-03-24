@@ -6,9 +6,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Infrastructure.fs" />
     <Compile Include="Commands/AnalyzeCommand.fs" />
     <Compile Include="AssemblyInfoAPI.fs" />
     <Compile Include="Main.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FSharp.Analyzer.Core\FSharp.Analyzer.Core.fsproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

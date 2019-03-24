@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFrameworks>netcoreapp2.1;netcoreapp2.2;</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0</TargetFrameworks>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Include="AssemblyInfo.fs" />
-        <Compile Include="Tests.fs" />
-        <Compile Include="Main.fs" />
+        <Compile Include="SampleOptionAnalyzer.fs" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../../src/FSharp.Analyzer.Core/FSharp.Analyzer.Core.fsproj" />
-        <ProjectReference Include="..\..\testData\FSharp.Analyzers.Sample\FSharp.Analyzers.Sample.fsproj" />
     </ItemGroup>
     <Import Project="..\..\fsc.props" />
     <Import Project="..\..\netfx.props" />
