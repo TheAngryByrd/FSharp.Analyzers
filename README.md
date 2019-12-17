@@ -1,6 +1,8 @@
 # FSharp.Analyzer
 
-[Enter useful description for FSharp.Analyzer]
+
+`FSharp.Analyzers.SDK` has [now implemented a CLI tool](https://github.com/ionide/FSharp.Analyzers.SDK/pull/7 
+). This experiement is now archived. 
 
 ---
 
